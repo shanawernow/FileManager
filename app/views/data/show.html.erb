@@ -1,0 +1,14 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Filename:</strong>
+  <%= @datum.filename %>
+</p>
+
+<p>
+  <strong>Filesize:</strong>
+  <%= @datum.filesize %>
+</p>
+
+<%= link_to 'Edit', edit_datum_path(@datum) %> |
+<%= link_to 'Back', user_data_path(@datum.user) %>
