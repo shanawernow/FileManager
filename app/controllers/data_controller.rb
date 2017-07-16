@@ -29,8 +29,21 @@ class DataController < ApplicationController
   def create
     @user = User.find(params[:user_id])
     @datum = @user.datum.new(datum_params)
+    uploadedFile = params[:datum][:filedata]
+    if uploadedFile != nil
+      t = Time.now
+      ext = File.extname(uploadedFile.original_filename)
+      savename = "file_#{t.strftime("%Y%m%d%H%M")}" + ext
+      @datum.filename = uploadedFile.original_filename
+      @datum.savefilename = savename
 
-    respond_to do |format|
+      savepath = Rails.root.join('public','filedata',savename)
+
+      File.open(savepath,'wb') do |file|
+        file.write(uploadedFile.read)
+      end
+
+    #respond_to do |format|
       if @datum.save
         format.html { redirect_to user_data_url(@user), notice: 'Datum was successfully created.' }
         format.json { render :show, status: :created, location: @datum }
@@ -44,7 +57,7 @@ class DataController < ApplicationController
   # PATCH/PUT /data/1
   # PATCH/PUT /data/1.json
   def update
-    respond_to do |format|
+    #respond_to do |format|
       if @datum.update(datum_params)
         format.html { redirect_to @datum, notice: 'Datum was successfully updated.' }
         format.json { render :show, status: :ok, location: @datum }
@@ -52,17 +65,23 @@ class DataController < ApplicationController
         format.html { render :edit }
         format.json { render json: @datum.errors, status: :unprocessable_entity }
       end
-    end
+    #end
   end
 
   # DELETE /data/1
   # DELETE /data/1.json
   def destroy
-    @datum.destroy
-    respond_to do |format|
+    id = params[:id]
+    fil = User.find(id)
+    if fil != nil
+      filename = Rails.root.join('public','filedata',fil.savefilename)
+      File.delete(filename) if File.exist?(filename)
+      fil.destroy
+    end
+  #  respond_to do |format|
       format.html { redirect_to user_data_url(@datum.user), notice: 'Datum was successfully destroyed.' }
       format.json { head :no_content }
-    end
+    #end
   end
 
   private
